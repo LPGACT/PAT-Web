@@ -249,6 +249,9 @@ section{padding:9rem 5vw;}
 .form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:rgba(201,168,76,.5);}
 .form-group textarea{resize:vertical;min-height:90px;}
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+.phone-input-row{display:flex;gap:.5rem;}
+.phone-input-row select{width:130px;flex-shrink:0;}
+.phone-input-row input{flex:1;}
 .form-submit{width:100%;padding:1rem;background:linear-gradient(135deg,var(--gold),#a87f30);color:var(--ink);font-family:'Outfit',sans-serif;font-size:.88rem;font-weight:600;letter-spacing:.06em;border:none;border-radius:50px;cursor:none;transition:transform .25s,box-shadow .25s;box-shadow:0 4px 20px rgba(201,168,76,.3);margin-top:.5rem;}
 .form-submit:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(201,168,76,.45);}
 .form-note{font-size:.72rem;color:var(--muted);text-align:center;margin-top:.8rem;line-height:1.5;}
@@ -759,19 +762,17 @@ footer{background:var(--ink);border-top:1px solid rgba(201,168,76,.1);padding:4r
             <div class="form-group"><label data-en="Last Name" data-es="Apellido">Last Name</label><input type="text" id="lname" placeholder="Smith" data-ph-en="Smith" data-ph-es="García"/></div>
           </div>
           <div class="form-group"><label data-en="Email Address" data-es="Correo Electrónico">Email Address</label><input type="email" id="email" placeholder="john@example.com"/></div>
+          <div class="form-group">
+            <label data-en="Phone / WhatsApp" data-es="Teléfono / WhatsApp">Phone / WhatsApp</label>
+            <div class="phone-input-row">
+              <select id="phoneCode"></select>
+              <input type="tel" id="phoneNumber" placeholder="555 000 0000" data-ph-en="555 000 0000" data-ph-es="555 000 0000"/>
+            </div>
+          </div>
           <div class="form-row">
             <div class="form-group">
               <label data-en="Country" data-es="País">Country</label>
-              <select id="country">
-                <option value="" data-en="Select..." data-es="Seleccionar...">Select...</option>
-                <option data-en="United Kingdom" data-es="Reino Unido">United Kingdom</option>
-                <option data-en="Germany" data-es="Alemania">Germany</option>
-                <option data-en="Switzerland" data-es="Suiza">Switzerland</option>
-                <option>UAE</option><option>Singapore</option>
-                <option>Argentina</option>
-                <option data-en="Brazil" data-es="Brasil">Brazil</option>
-                <option data-en="Other" data-es="Otro">Other</option>
-              </select>
+              <select id="country"></select>
             </div>
             <div class="form-group">
               <label data-en="Investment Size" data-es="Monto de Inversión">Investment Size</label>
@@ -795,6 +796,8 @@ footer{background:var(--ink);border-top:1px solid rgba(201,168,76,.1);padding:4r
             </select>
           </div>
           <div class="form-group"><label data-en="Message (optional)" data-es="Mensaje (opcional)">Message (optional)</label><textarea id="message" placeholder="Questions about the offering, legal structure, or KYC process..." data-ph-en="Questions about the offering, legal structure, or KYC process..." data-ph-es="Preguntas sobre la oferta, estructura legal o proceso de KYC..."></textarea></div>
+          <!-- honeypot: hidden from users, bots fill it automatically -->
+          <input type="text" id="website" name="website" style="display:none;" tabindex="-1" autocomplete="off"/>
           <button class="form-submit" id="submitBtn" onclick="handleSubmit()" data-en="Request Early Access →" data-es="Solicitar Acceso Anticipado →">Request Early Access →</button>
           <p class="form-note" data-en="We respond within 48 hours with a full investor prospectus and onboarding documents." data-es="Respondemos en 48 horas con el prospecto completo para inversores y los documentos de incorporación.">We respond within 48 hours with a full investor prospectus and onboarding documents.</p>
         </div>
@@ -918,6 +921,92 @@ function showScenario(id){
   event.target.classList.add('active');
 }
 
+// ── COUNTRY & DIAL CODE DATA  [en, es, dialCode, flag]
+const COUNTRY_DATA=[
+  ['Afghanistan','Afganistán','+93','🇦🇫'],['Albania','Albania','+355','🇦🇱'],['Algeria','Argelia','+213','🇩🇿'],
+  ['Andorra','Andorra','+376','🇦🇩'],['Angola','Angola','+244','🇦🇴'],['Argentina','Argentina','+54','🇦🇷'],
+  ['Armenia','Armenia','+374','🇦🇲'],['Australia','Australia','+61','🇦🇺'],['Austria','Austria','+43','🇦🇹'],
+  ['Azerbaijan','Azerbaiyán','+994','🇦🇿'],['Bahrain','Bahrein','+973','🇧🇭'],['Bangladesh','Bangladés','+880','🇧🇩'],
+  ['Belarus','Bielorrusia','+375','🇧🇾'],['Belgium','Bélgica','+32','🇧🇪'],['Bolivia','Bolivia','+591','🇧🇴'],
+  ['Bosnia and Herzegovina','Bosnia y Herzegovina','+387','🇧🇦'],['Botswana','Botsuana','+267','🇧🇼'],
+  ['Brazil','Brasil','+55','🇧🇷'],['Bulgaria','Bulgaria','+359','🇧🇬'],['Cambodia','Camboya','+855','🇰🇭'],
+  ['Cameroon','Camerún','+237','🇨🇲'],['Canada','Canadá','+1','🇨🇦'],['Chile','Chile','+56','🇨🇱'],
+  ['China','China','+86','🇨🇳'],['Colombia','Colombia','+57','🇨🇴'],['Costa Rica','Costa Rica','+506','🇨🇷'],
+  ['Croatia','Croacia','+385','🇭🇷'],['Cuba','Cuba','+53','🇨🇺'],['Cyprus','Chipre','+357','🇨🇾'],
+  ['Czech Republic','República Checa','+420','🇨🇿'],['Denmark','Dinamarca','+45','🇩🇰'],
+  ['Dominican Republic','República Dominicana','+1809','🇩🇴'],['Ecuador','Ecuador','+593','🇪🇨'],
+  ['Egypt','Egipto','+20','🇪🇬'],['El Salvador','El Salvador','+503','🇸🇻'],['Estonia','Estonia','+372','🇪🇪'],
+  ['Ethiopia','Etiopía','+251','🇪🇹'],['Finland','Finlandia','+358','🇫🇮'],['France','Francia','+33','🇫🇷'],
+  ['Georgia','Georgia','+995','🇬🇪'],['Germany','Alemania','+49','🇩🇪'],['Ghana','Ghana','+233','🇬🇭'],
+  ['Greece','Grecia','+30','🇬🇷'],['Guatemala','Guatemala','+502','🇬🇹'],['Honduras','Honduras','+504','🇭🇳'],
+  ['Hong Kong','Hong Kong','+852','🇭🇰'],['Hungary','Hungría','+36','🇭🇺'],['Iceland','Islandia','+354','🇮🇸'],
+  ['India','India','+91','🇮🇳'],['Indonesia','Indonesia','+62','🇮🇩'],['Iran','Irán','+98','🇮🇷'],
+  ['Iraq','Irak','+964','🇮🇶'],['Ireland','Irlanda','+353','🇮🇪'],['Israel','Israel','+972','🇮🇱'],
+  ['Italy','Italia','+39','🇮🇹'],['Jamaica','Jamaica','+1876','🇯🇲'],['Japan','Japón','+81','🇯🇵'],
+  ['Jordan','Jordania','+962','🇯🇴'],['Kazakhstan','Kazajistán','+7','🇰🇿'],['Kenya','Kenia','+254','🇰🇪'],
+  ['Kuwait','Kuwait','+965','🇰🇼'],['Latvia','Letonia','+371','🇱🇻'],['Lebanon','Líbano','+961','🇱🇧'],
+  ['Lithuania','Lituania','+370','🇱🇹'],['Luxembourg','Luxemburgo','+352','🇱🇺'],['Malaysia','Malasia','+60','🇲🇾'],
+  ['Maldives','Maldivas','+960','🇲🇻'],['Malta','Malta','+356','🇲🇹'],['Mexico','México','+52','🇲🇽'],
+  ['Moldova','Moldavia','+373','🇲🇩'],['Monaco','Mónaco','+377','🇲🇨'],['Morocco','Marruecos','+212','🇲🇦'],
+  ['Mozambique','Mozambique','+258','🇲🇿'],['Myanmar','Myanmar','+95','🇲🇲'],['Nepal','Nepal','+977','🇳🇵'],
+  ['Netherlands','Países Bajos','+31','🇳🇱'],['New Zealand','Nueva Zelanda','+64','🇳🇿'],
+  ['Nicaragua','Nicaragua','+505','🇳🇮'],['Nigeria','Nigeria','+234','🇳🇬'],['Norway','Noruega','+47','🇳🇴'],
+  ['Oman','Omán','+968','🇴🇲'],['Pakistan','Pakistán','+92','🇵🇰'],['Panama','Panamá','+507','🇵🇦'],
+  ['Paraguay','Paraguay','+595','🇵🇾'],['Peru','Perú','+51','🇵🇪'],['Philippines','Filipinas','+63','🇵🇭'],
+  ['Poland','Polonia','+48','🇵🇱'],['Portugal','Portugal','+351','🇵🇹'],['Qatar','Catar','+974','🇶🇦'],
+  ['Romania','Rumanía','+40','🇷🇴'],['Russia','Rusia','+7','🇷🇺'],['Saudi Arabia','Arabia Saudita','+966','🇸🇦'],
+  ['Senegal','Senegal','+221','🇸🇳'],['Serbia','Serbia','+381','🇷🇸'],['Singapore','Singapur','+65','🇸🇬'],
+  ['Slovakia','Eslovaquia','+421','🇸🇰'],['Slovenia','Eslovenia','+386','🇸🇮'],['South Africa','Sudáfrica','+27','🇿🇦'],
+  ['South Korea','Corea del Sur','+82','🇰🇷'],['Spain','España','+34','🇪🇸'],['Sri Lanka','Sri Lanka','+94','🇱🇰'],
+  ['Sweden','Suecia','+46','🇸🇪'],['Switzerland','Suiza','+41','🇨🇭'],['Taiwan','Taiwán','+886','🇹🇼'],
+  ['Tanzania','Tanzania','+255','🇹🇿'],['Thailand','Tailandia','+66','🇹🇭'],['Tunisia','Túnez','+216','🇹🇳'],
+  ['Turkey','Turquía','+90','🇹🇷'],['UAE','Emiratos Árabes Unidos','+971','🇦🇪'],['Uganda','Uganda','+256','🇺🇬'],
+  ['Ukraine','Ucrania','+380','🇺🇦'],['United Kingdom','Reino Unido','+44','🇬🇧'],
+  ['United States','Estados Unidos','+1','🇺🇸'],['Uruguay','Uruguay','+598','🇺🇾'],
+  ['Uzbekistan','Uzbekistán','+998','🇺🇿'],['Venezuela','Venezuela','+58','🇻🇪'],['Vietnam','Vietnam','+84','🇻🇳'],
+  ['Zambia','Zambia','+260','🇿🇲'],['Zimbabwe','Zimbabue','+263','🇿🇼'],['Other','Otro','','🌐'],
+];
+
+function populateSelects(l){
+  const sorted=[...COUNTRY_DATA].sort((a,b)=>{
+    if(a[0]==='Other')return 1; if(b[0]==='Other')return -1;
+    return(l==='es'?a[1]:a[0]).localeCompare(l==='es'?b[1]:b[0],l);
+  });
+
+  // Country dropdown
+  const cEl=document.getElementById('country');
+  const cVal=cEl.value;
+  cEl.innerHTML=`<option value="">${l==='es'?'Seleccionar...':'Select...'}</option>`;
+  sorted.forEach(([en,es])=>{
+    const o=document.createElement('option');
+    o.value=en; o.textContent=l==='es'?es:en; cEl.appendChild(o);
+  });
+  if(cVal)cEl.value=cVal;
+
+  // Phone code dropdown
+  const pEl=document.getElementById('phoneCode');
+  const pVal=pEl.value;
+  pEl.innerHTML='';
+  sorted.forEach(([en,es,dial,flag])=>{
+    if(!dial)return;
+    const o=document.createElement('option');
+    o.value=dial; o.textContent=`${flag} ${dial}`; pEl.appendChild(o);
+  });
+  if(pVal){pEl.value=pVal;}
+  else{
+    // Auto-detect by timezone
+    const tz=Intl.DateTimeFormat().resolvedOptions().timeZone||'';
+    if(tz.includes('Argentina'))pEl.value='+54';
+    else if(tz.includes('America/Mexico'))pEl.value='+52';
+    else if(tz.includes('America/Bogota'))pEl.value='+57';
+    else if(tz.includes('America/Santiago'))pEl.value='+56';
+    else if(tz.includes('America/Lima'))pEl.value='+51';
+    else if(tz.includes('Europe/London'))pEl.value='+44';
+    else if(tz.includes('Europe'))pEl.value='+34';
+    else pEl.value='+1';
+  }
+}
+
 // ── LANG
 let lang='en';
 function setLang(l){
@@ -933,19 +1022,71 @@ function setLang(l){
     else el.innerHTML=v;
   });
   document.title=l==='es'?'PAT — Pistacho Agro Token | Invertí en Agricultura Real':'PAT — Pistachio Agro Token | Invest in Real Agriculture';
+  populateSelects(l);
 }
+populateSelects('en');
 
 // ── FORM
-function handleSubmit(){
-  const f=document.getElementById('fname'),e=document.getElementById('email');
-  if(!f.value.trim()||!e.value.trim()){
-    [f,e].forEach(el=>{if(!el.value.trim()){el.style.borderColor='rgba(224,112,112,.6)';setTimeout(()=>el.style.borderColor='',2000);}});
-    return;
+async function handleSubmit(){
+  const fields = {
+    fname:       document.getElementById('fname'),
+    email:       document.getElementById('email'),
+    phoneNumber: document.getElementById('phoneNumber'),
+    country:     document.getElementById('country'),
+    amount:      document.getElementById('amount'),
+    type:        document.getElementById('type'),
+  };
+
+  // Client-side: highlight empty required fields
+  let hasError = false;
+  Object.values(fields).forEach(el => {
+    if (!el.value.trim()) {
+      el.style.borderColor = 'rgba(224,112,112,.6)';
+      setTimeout(() => el.style.borderColor = '', 2000);
+      hasError = true;
+    }
+  });
+  if (hasError) return;
+
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.textContent = lang === 'es' ? 'Enviando…' : 'Sending…';
+
+  const body = {
+    fullName:                 fields.fname.value.trim() + ' ' + document.getElementById('lname').value.trim(),
+    email:                    fields.email.value.trim(),
+    phoneOrWhatsApp:          document.getElementById('phoneCode').value + ' ' + fields.phoneNumber.value.trim(),
+    country:                  fields.country.value,
+    investorType:             fields.type.value,
+    estimatedInvestmentRange: fields.amount.value,
+    message:                  document.getElementById('message').value.trim(),
+    website:                  document.getElementById('website').value, // honeypot
+  };
+
+  try {
+    const res  = await fetch('http://localhost:3000/api/investor-interest', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify(body),
+    });
+    const data = await res.json();
+
+    if (data.success) {
+      document.getElementById('contactForm').style.display = 'none';
+      const s = document.getElementById('formSuccess');
+      s.style.display = 'flex';
+      setLang(lang);
+    } else {
+      const msg = data.errors ? data.errors.map(e => e.message).join('\n') : data.message;
+      alert(msg || (lang === 'es' ? 'Algo salió mal. Intentá de nuevo.' : 'Something went wrong. Please try again.'));
+      btn.disabled = false;
+      btn.textContent = lang === 'es' ? 'Solicitar Acceso Anticipado →' : 'Request Early Access →';
+    }
+  } catch (err) {
+    alert(lang === 'es' ? 'Error de conexión. Intentá de nuevo.' : 'Connection error. Please try again.');
+    btn.disabled = false;
+    btn.textContent = lang === 'es' ? 'Solicitar Acceso Anticipado →' : 'Request Early Access →';
   }
-  document.getElementById('contactForm').style.display='none';
-  const s=document.getElementById('formSuccess');
-  s.style.display='flex';
-  setLang(lang);
 }
 
 // ── PROJECT VIDEO TOGGLE

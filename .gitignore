@@ -1,1 +1,8 @@
 imagenes/POZO 1 y galpon ppal.mp4.MOV
+
+# Backend secrets — NEVER commit
+Back/.env
+Back/google-credentials.json
+
+# Dependencies
+Back/node_modules/

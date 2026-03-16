@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node server.js)",
+      "Bash(powershell -Command \"Invoke-RestMethod -Uri ''http://localhost:3000/api/investor-interest'' -Method POST -ContentType ''application/json'' -Body ''{\"\"fullName\"\":\"\"Test Fix\"\",\"\"email\"\":\"\"test@example.com\"\",\"\"phoneOrWhatsApp\"\":\"\"+54 911 555 0000\"\",\"\"country\"\":\"\"Argentina\"\",\"\"investorType\"\":\"\"Individual / HNWI\"\",\"\"estimatedInvestmentRange\"\":\"\"USD 500,000+\"\",\"\"message\"\":\"\"\"\",\"\"website\"\":\"\"\"\"}''\")",
+      "Bash(powershell -Command \"Invoke-RestMethod -Uri ''http://localhost:3000/api/investor-interest'' -Method POST -ContentType ''application/json'' -Body ''{\"\"fullName\"\":\"\"Lautaro Cucco\"\",\"\"email\"\":\"\"lautarocucco51@gmail.com\"\",\"\"phoneOrWhatsApp\"\":\"\"+54 911 555 0000\"\",\"\"country\"\":\"\"Argentina\"\",\"\"investorType\"\":\"\"Individual / HNWI\"\",\"\"estimatedInvestmentRange\"\":\"\"USD 5,000 - 25,000\"\",\"\"message\"\":\"\"Prueba de envio desde Claude Code\"\",\"\"website\"\":\"\"\"\"}''\")",
+      "Bash(powershell -Command \"Invoke-RestMethod -Uri ''http://localhost:3000/api/investor-interest'' -Method POST -ContentType ''application/json'' -Body ''{\"\"fullName\"\":\"\"Lautaro Cucco\"\",\"\"email\"\":\"\"lautarocucco51@gmail.com\"\",\"\"phoneOrWhatsApp\"\":\"\"+54 911 555 0000\"\",\"\"country\"\":\"\"Argentina\"\",\"\"investorType\"\":\"\"Individual / HNWI\"\",\"\"estimatedInvestmentRange\"\":\"\"USD 500,000+\"\",\"\"message\"\":\"\"Prueba de envio desde Claude Code\"\",\"\"website\"\":\"\"\"\"}''\")",
+      "Bash(powershell -Command \"Invoke-RestMethod -Uri ''http://localhost:3000/api/investor-interest'' -Method POST -ContentType ''application/json'' -Body ''{\"\"fullName\"\":\"\"Test Fecha\"\",\"\"email\"\":\"\"test@example.com\"\",\"\"phoneOrWhatsApp\"\":\"\"+54 911 000 0000\"\",\"\"country\"\":\"\"Argentina\"\",\"\"investorType\"\":\"\"Individual / HNWI\"\",\"\"estimatedInvestmentRange\"\":\"\"USD 500,000+\"\",\"\"message\"\":\"\"\"\",\"\"website\"\":\"\"\"\"}''\")",
+      "Bash(node formatSheet.js)"
+    ]
+  }
+}
